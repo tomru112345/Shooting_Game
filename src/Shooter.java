@@ -74,18 +74,18 @@ public class Shooter extends PApplet {
 
         // 時間dt分の移動
         void step(float dt) {
-            Vector velocity = Shooter.PLAYER_VELOCITY.createScale(direction);
-            position.add(velocity.createScale(dt));
-            if (position.x < 10) {
-                position.x = 10;
-            } else if (position.x > Shooter.SCREEN_SIZE.x - 10) {
-                position.x = Shooter.SCREEN_SIZE.x - 10;
-            }
-            if (position.y < 0.5f * Shooter.SCREEN_SIZE.y + 10) {
-                position.y = 0.5f * Shooter.SCREEN_SIZE.y + 10;
-            } else if (position.y > Shooter.SCREEN_SIZE.y - 10) {
-                position.y = Shooter.SCREEN_SIZE.y - 10;
-            }
+            // Vector velocity = Shooter.PLAYER_VELOCITY.createScale(direction);
+            // position.add(velocity.createScale(dt));
+            // if (position.x < 10) {
+            // position.x = 10;
+            // } else if (position.x > Shooter.SCREEN_SIZE.x - 10) {
+            // position.x = Shooter.SCREEN_SIZE.x - 10;
+            // }
+            // if (position.y < 0.5f * Shooter.SCREEN_SIZE.y + 10) {
+            // position.y = 0.5f * Shooter.SCREEN_SIZE.y + 10;
+            // } else if (position.y > Shooter.SCREEN_SIZE.y - 10) {
+            // position.y = Shooter.SCREEN_SIZE.y - 10;
+            // }
         }
 
         // 敵enemyとの衝突判定
@@ -231,16 +231,8 @@ public class Shooter extends PApplet {
 
         bulletShootFlag = false;
         Random random = new Random();
+
         // 敵の位置・速度の初期値と揺れの係数をランダムに決定
-        // for (int i = 0; i < 20; i++) {
-        // Vector enemyPosition = SCREEN_SIZE
-        // .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f *
-        // random.nextFloat()));
-        // Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 *
-        // (random.nextFloat() + 0.5f));
-        // float enemyFactor = 25 * (random.nextFloat() + 0.5f);
-        // objects.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
-        // }
 
         for (int i = 0; i < 1; i++) {
             Vector enemyPosition = SCREEN_SIZE
@@ -400,8 +392,8 @@ public class Shooter extends PApplet {
         doDraw();
     }
 
-    // ProcessingのmouseClickedメソッド
-    public void mouseClicked() {
+    // ProcessingのmousePressedメソッド
+    public void mousePressed() {
         // bulletShootFlag = true;
         objects.add(new Bullet(objects.get(0).position, BULLET_VELOCITY));
     }

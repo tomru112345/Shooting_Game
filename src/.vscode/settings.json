@@ -1,22 +1,6 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\core.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-linux-aarch64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-linux-amd64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-linux-armv6hf.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-linux-i586.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-macosx-universal.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-windows-amd64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\gluegen-rt-natives-windows-i586.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-linux-aarch64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-linux-amd64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-linux-armv6hf.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-linux-i586.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-macosx-universal.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-windows-amd64.jar",
-        "c:\\Program Files\\processing-4.0b1\\core\\library\\jogl-all-natives-windows-i586.jar"
+        "c:\\Program Files\\processing-4.0b1\\core\\library\\*.jar"
     ]
 }
