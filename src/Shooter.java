@@ -7,7 +7,9 @@ public class Shooter extends PApplet {
     static final Vector SCREEN_SIZE = new Vector(500, 750); // 画面サイズ
     static final Vector PLAYER_VELOCITY = new Vector(200, 200); // 自機の速度
     static final Vector BULLET_VELOCITY = new Vector(0, -500); // 弾の速度
+    static final Vector ENEMY_BULLET_VELOCITY = new Vector(0, 125); // 弾の速度
     static final float TIME_STEP = 1 / 60.0f; // 1フレームの時間
+
     static final int MENU = 0; // メニュー
     static final int PLAY = 1; // ゲームプレイ
     static final int RETIRE = 2; // リタイア
@@ -53,6 +55,11 @@ public class Shooter extends PApplet {
             return false;
         }
 
+        // 敵弾 との衝突判定
+        boolean checkCollisionEnemyBullet(EnemyBullet enemyBullet) {
+            return false;
+        }
+
         // Processing 画面への描画
         abstract void draw();
     }
@@ -92,6 +99,12 @@ public class Shooter extends PApplet {
         boolean checkCollision(Enemy enemy) {
             return position.x > enemy.position.x - 10 && position.x < enemy.position.x + 10
                     && position.y > enemy.position.y - 10 && position.y < enemy.position.y + 10;
+        }
+
+        // 敵弾との衝突判定
+        boolean checkCollisionEnemyBullet(EnemyBullet enemyBullet) {
+            return position.x > enemyBullet.position.x - 10 && position.x < enemyBullet.position.x + 10
+                    && position.y > enemyBullet.position.y - 10 && position.y < enemyBullet.position.y + 10;
         }
 
         // Processing画面への描画
@@ -212,22 +225,31 @@ public class Shooter extends PApplet {
 
         // Processing画面への描画
         void draw() {
-            fill(255, 255, 128);
-            rect(position.x - 2, position.y - 10, 4, 20);
+            // fill(255, 255, 128);
+            fill(255, 64, 128);
+            ellipse(position.x + 2, position.y + 10, 10, 10);
         }
 
     }
 
     boolean bulletShootFlag; // 弾を撃つか
-    // BEGIN
-    ArrayList<ShooterObject> objects = new ArrayList<ShooterObject>();
-    // END
+
+    boolean EnemyBulletShootFlag; // 敵弾を撃つか
+
+    ArrayList<ShooterObject> playerList = new ArrayList<ShooterObject>();
+    ArrayList<ShooterObject> EnemyList = new ArrayList<ShooterObject>();
+    ArrayList<ShooterObject> playerBulletList = new ArrayList<ShooterObject>();
+    ArrayList<ShooterObject> EnemyBulletList = new ArrayList<ShooterObject>();
 
     // 初期化
     void initialize() {
+        playerList.clear();
+        playerList.add(new Player(SCREEN_SIZE.createScale(new Vector(0.5f, 0.9f))));
 
-        objects.clear();
-        objects.add(new Player(SCREEN_SIZE.createScale(new Vector(0.5f, 0.9f))));
+        EnemyList.clear();
+        playerBulletList.clear();
+        EnemyBulletList.clear(); // 敵の弾クリア
+        EnemyBulletShootFlag = false;
 
         bulletShootFlag = false;
         Random random = new Random();
@@ -235,12 +257,21 @@ public class Shooter extends PApplet {
         // 敵の位置・速度の初期値と揺れの係数をランダムに決定
 
         for (int i = 0; i < 1; i++) {
-            Vector enemyPosition = SCREEN_SIZE
-                    .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f * random.nextFloat()));
-            Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 * (random.nextFloat() + 0.5f));
+            // Vector enemyPosition = SCREEN_SIZE
+            // .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f *
+            // random.nextFloat()));
+            Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, 0.2f));
+            // Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 *
+            // (random.nextFloat() + 0.5f));
+            Vector enemyVelocity = new Vector(0, 0);
             float enemyFactor = 25 * (random.nextFloat() + 0.5f);
 
-            objects.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
+            EnemyList.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
+
+            for (int t = 0; t < 5; t++) {
+                EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
+            }
+
         }
 
     }
@@ -257,43 +288,119 @@ public class Shooter extends PApplet {
 
     // 移動
     void move() {
-        // BEGIN
-        if (objects != null) {
-            // 自機,弾,敵を移動
-            for (int i = 0; i < objects.size(); i++) {
-                if (i != 0) {
-                    objects.get(i).step(TIME_STEP);
-                } else {
-                    if (objects.get(0).isPlayer()) {
-                        ShooterObject player = objects.get(0);
+        if (GAME_MODE == PLAY) {
+            if (playerList != null) {
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(0).isPlayer()) {
+                        ShooterObject player = playerList.get(0);
                         player.position.set(mouseX, mouseY);
                     }
+
+                }
+            }
+
+            if (playerBulletList != null) {
+                // 弾を移動
+                for (int i = 0; i < playerBulletList.size(); i++) {
+                    playerBulletList.get(i).step(TIME_STEP);
+
+                }
+            }
+
+            if (EnemyList != null) {
+                // 敵を移動
+                for (int i = 0; i < EnemyList.size(); i++) {
+                    EnemyList.get(i).step(TIME_STEP);
+
+                }
+            }
+
+            if (EnemyBulletList != null) {
+                // 敵弾を移動
+                for (int i = 0; i < EnemyBulletList.size(); i++) {
+                    EnemyBulletList.get(i).step(TIME_STEP);
+
+                }
+            }
+
+            if (EnemyBulletList != null) {
+                for (int i = 0; i < EnemyBulletList.size(); i++) {
+                    EnemyBulletList.get(i).step(TIME_STEP);
+                }
+            } else {
+                for (int t = 0; t < 5; t++) {
+                    EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
                 }
             }
         }
-        // END
+
     }
 
     // 衝突判定
     void react() {
-        if (objects != null) {
-            for (int i = 0; i < objects.size(); i++) {
-                for (int t = 1; t < objects.size(); t++) {
-                    // for (int t = 0; t < objects.size(); t++) {
-                    if (objects.get(i) != null && objects.get(t) != null) {
-                        if (objects.get(t).isEnemy()) {
-                            if (objects.get(i).checkCollision((Enemy) objects.get(t))) {
-                                objects.get(i).removeFlag = true;
-                                objects.get(t).removeFlag = true;
+        if (GAME_MODE == PLAY) {
+            if (playerList != null) {
+                for (int i = 0; i < playerList.size(); i++) {
+                    for (int t = 0; t < EnemyList.size(); t++) {
+                        if (playerList.get(i) != null && EnemyList.get(t) != null) {
+                            if (EnemyList.get(t).isEnemy()) {
+                                if (playerList.get(i).checkCollision((Enemy) EnemyList.get(t))) {
+                                    playerList.get(i).removeFlag = true;
+                                    EnemyList.get(t).removeFlag = true;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            for (int i = 0; i < objects.size(); i++) {
-                if (objects.get(i) != null && objects.get(i).removeFlag) {
-                    objects.remove(i);
+                for (int i = 0; i < playerBulletList.size(); i++) {
+                    for (int t = 0; t < EnemyList.size(); t++) {
+                        if (playerBulletList.get(i) != null && EnemyList.get(t) != null) {
+                            if (EnemyList.get(t).isEnemy()) {
+                                if (playerBulletList.get(i).checkCollision((Enemy) EnemyList.get(t))) {
+                                    playerBulletList.get(i).removeFlag = true;
+                                    EnemyList.get(t).removeFlag = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < playerList.size(); i++) {
+                    for (int t = 0; t < EnemyBulletList.size(); t++) {
+                        if (playerList.get(i) != null && EnemyBulletList.get(t) != null) {
+                            if (EnemyBulletList.get(t).isEnemyBullet()) {
+                                if (playerList.get(i).checkCollisionEnemyBullet((EnemyBullet) EnemyBulletList.get(t))) {
+                                    playerList.get(i).removeFlag = true;
+                                    EnemyBulletList.get(t).removeFlag = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(i) != null && playerList.get(i).removeFlag) {
+                        playerList.remove(i);
+                    }
+                }
+
+                for (int i = 0; i < EnemyList.size(); i++) {
+                    if (EnemyList.get(i) != null && EnemyList.get(i).removeFlag) {
+                        EnemyList.remove(i);
+                    }
+                }
+
+                for (int i = 0; i < playerBulletList.size(); i++) {
+                    if (playerBulletList.get(i) != null && playerBulletList.get(i).removeFlag) {
+                        playerBulletList.remove(i);
+                    }
+                }
+
+                for (int i = 0; i < EnemyBulletList.size(); i++) {
+                    if (EnemyBulletList.get(i) != null && EnemyBulletList.get(i).removeFlag) {
+                        EnemyBulletList.remove(i);
+                    }
                 }
             }
         }
@@ -331,39 +438,39 @@ public class Shooter extends PApplet {
 
         else if (GAME_MODE == GAME_OVER) {
             // ゲームオーバー
-            if (players == 0) {
-                fill(255, 192, 192);
-                textSize(64);
-                textAlign(CENTER, CENTER);
-                text("GAME OVER", 0.5f * SCREEN_SIZE.x, 0.5f * SCREEN_SIZE.y);
-                textSize(32);
-                text("-space-", 0.5f * SCREEN_SIZE.x, 0.7f * SCREEN_SIZE.y);
-            }
+            fill(255, 192, 192);
+            textSize(64);
+            textAlign(CENTER, CENTER);
+            text("GAME OVER", 0.5f * SCREEN_SIZE.x, 0.5f * SCREEN_SIZE.y);
+            textSize(32);
+            text("-space-", 0.5f * SCREEN_SIZE.x, 0.7f * SCREEN_SIZE.y);
         }
 
         else if (GAME_MODE == CLEAR) {
             // ゲームクリア
-            if (enemies == 0) {
-                fill(192, 255, 192);
-                textSize(64);
-                textAlign(CENTER, CENTER);
-                text("GAME CLEAR", 0.5f * SCREEN_SIZE.x, 0.5f * SCREEN_SIZE.y);
-                textSize(32);
-                text("-space-", 0.5f * SCREEN_SIZE.x, 0.7f * SCREEN_SIZE.y);
-            }
+            fill(192, 255, 192);
+            textSize(64);
+            textAlign(CENTER, CENTER);
+            text("GAME CLEAR", 0.5f * SCREEN_SIZE.x, 0.5f * SCREEN_SIZE.y);
+            textSize(32);
+            text("-space-", 0.5f * SCREEN_SIZE.x, 0.7f * SCREEN_SIZE.y);
         }
 
         else if (GAME_MODE == PLAY) {
-            if (objects != null) {
-                for (int i = 0; i < objects.size(); i++) {
-                    if (objects.get(i) != null) {
-                        objects.get(i).draw();
+            if (playerList != null) {
+                players = playerList.size();
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(i) != null) {
+                        playerList.get(i).draw();
                     }
+                }
+            }
 
-                    if (objects.get(i).isPlayer()) {
-                        players++;
-                    } else if (objects.get(i).isEnemy()) {
-                        enemies++;
+            if (EnemyList != null) {
+                enemies = EnemyList.size();
+                for (int i = 0; i < EnemyList.size(); i++) {
+                    if (EnemyList.get(i) != null) {
+                        EnemyList.get(i).draw();
                     }
                 }
 
@@ -371,6 +478,22 @@ public class Shooter extends PApplet {
                 textSize(30);
                 textAlign(CENTER, CENTER);
                 text(enemies, 0.1f * SCREEN_SIZE.x, 0.1f * SCREEN_SIZE.y);
+            }
+
+            if (playerBulletList != null) {
+                for (int i = 0; i < playerBulletList.size(); i++) {
+                    if (playerBulletList.get(i) != null) {
+                        playerBulletList.get(i).draw();
+                    }
+                }
+            }
+
+            if (EnemyBulletList != null) {
+                for (int i = 0; i < EnemyBulletList.size(); i++) {
+                    if (EnemyBulletList.get(i) != null) {
+                        EnemyBulletList.get(i).draw();
+                    }
+                }
             }
 
             // ゲームオーバー
@@ -394,8 +517,7 @@ public class Shooter extends PApplet {
 
     // ProcessingのmousePressedメソッド
     public void mousePressed() {
-        // bulletShootFlag = true;
-        objects.add(new Bullet(objects.get(0).position, BULLET_VELOCITY));
+        playerBulletList.add(new Bullet(playerList.get(0).position, BULLET_VELOCITY));
     }
 
     // ProcessingのkeyPressedメソッド
