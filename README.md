@@ -5,3 +5,5 @@
 ## 参考資料
 
 * [敵に弾を発射させてみよう](https://bituse.info/game/shot/10)
+
+* [Processing-ShootingGame](https://github.com/muratamuu/Processing-ShootingGame)

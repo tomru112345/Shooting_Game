@@ -7,7 +7,7 @@ public class Shooter extends PApplet {
     static final Vector SCREEN_SIZE = new Vector(500, 750); // 画面サイズ
     static final Vector PLAYER_VELOCITY = new Vector(200, 200); // 自機の速度
     static final Vector BULLET_VELOCITY = new Vector(0, -500); // 弾の速度
-    static final Vector ENEMY_BULLET_VELOCITY = new Vector(0, 500); // 弾の速度
+    static final Vector ENEMY_BULLET_VELOCITY = new Vector(0, 300); // 弾の速度
     static final float TIME_STEP = 1 / 60.0f; // 1フレームの時間
 
     static final int MENU = 0; // メニュー
@@ -81,18 +81,6 @@ public class Shooter extends PApplet {
 
         // 時間dt分の移動
         void step(float dt) {
-            // Vector velocity = Shooter.PLAYER_VELOCITY.createScale(direction);
-            // position.add(velocity.createScale(dt));
-            // if (position.x < 10) {
-            // position.x = 10;
-            // } else if (position.x > Shooter.SCREEN_SIZE.x - 10) {
-            // position.x = Shooter.SCREEN_SIZE.x - 10;
-            // }
-            // if (position.y < 0.5f * Shooter.SCREEN_SIZE.y + 10) {
-            // position.y = 0.5f * Shooter.SCREEN_SIZE.y + 10;
-            // } else if (position.y > Shooter.SCREEN_SIZE.y - 10) {
-            // position.y = Shooter.SCREEN_SIZE.y - 10;
-            // }
         }
 
         // 敵enemyとの衝突判定
@@ -226,7 +214,7 @@ public class Shooter extends PApplet {
         // Processing画面への描画
         void draw() {
             // fill(255, 255, 128);
-            fill(255, 64, 128);
+            fill(255, 0, 0);
             ellipse(position.x + 2, position.y + 10, 10, 10);
         }
 
@@ -241,7 +229,7 @@ public class Shooter extends PApplet {
     ArrayList<ShooterObject> playerBulletList = new ArrayList<ShooterObject>();
     ArrayList<ShooterObject> EnemyBulletList = new ArrayList<ShooterObject>();
 
-    int count = 0;
+    int EnemyBulletCount = 0;
 
     // 初期化
     void initialize() {
@@ -259,18 +247,14 @@ public class Shooter extends PApplet {
         // 敵の位置・速度の初期値と揺れの係数をランダムに決定
 
         for (int i = 0; i < 1; i++) {
-            // Vector enemyPosition = SCREEN_SIZE
-            // .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f *
-            // random.nextFloat()));
-            Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, 0.2f));
-            // Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 *
-            // (random.nextFloat() + 0.5f));
-            Vector enemyVelocity = new Vector(0, 0);
+            Vector enemyPosition = SCREEN_SIZE
+                    .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f * random.nextFloat()));
+            // Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, 0.2f));
+            Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 * (random.nextFloat() + 0.5f));
+            // Vector enemyVelocity = new Vector(0, 0);
             float enemyFactor = 25 * (random.nextFloat() + 0.5f);
 
             EnemyList.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
-
-            EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
 
         }
 
@@ -328,16 +312,13 @@ public class Shooter extends PApplet {
                     EnemyBulletList.get(i).step(TIME_STEP);
                 }
 
-                if (count % 3600 == 0) {
-                    EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
-                }
-
             }
-        }
-        if (count % 3600 == 0) {
-            count = 0;
-        } else {
-            count++;
+            if (EnemyBulletCount % 30 == 0) {
+                EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
+                EnemyBulletCount = 0;
+            }
+
+            EnemyBulletCount++;
         }
 
     }
