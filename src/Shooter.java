@@ -47,6 +47,17 @@ public class Shooter extends PApplet {
             return false;
         }
 
+        boolean canRemove() {
+            return false;
+        }
+
+        int howHitPoint() {
+            return 0;
+        }
+
+        void setHitPoint() {
+        }
+
         // 時間 dt 分の移動
         abstract void step(float dt);
 
@@ -68,11 +79,13 @@ public class Shooter extends PApplet {
     class Player extends ShooterObject {
 
         Vector direction; // 移動方向
+        int HitPoint;
 
         // コンストラクタ
-        Player(Vector position) {
+        Player(Vector position, int HitPoint) {
             super(position);
             direction = new Vector(0, 0);
+            this.HitPoint = HitPoint;
         }
 
         boolean isPlayer() {
@@ -81,6 +94,14 @@ public class Shooter extends PApplet {
 
         // 時間dt分の移動
         void step(float dt) {
+        }
+
+        int howHitPoint() {
+            return HitPoint;
+        }
+
+        void setHitPoint() {
+            HitPoint--;
         }
 
         // 敵enemyとの衝突判定
@@ -136,6 +157,12 @@ public class Shooter extends PApplet {
                     && position.y > enemy.position.y - 10 && position.y < enemy.position.y + 10;
         }
 
+        // 敵弾との衝突判定
+        boolean checkCollisionEnemyBullet(EnemyBullet enemyBullet) {
+            return position.x > enemyBullet.position.x - 10 && position.x < enemyBullet.position.x + 10
+                    && position.y > enemyBullet.position.y - 10 && position.y < enemyBullet.position.y + 10;
+        }
+
         // Processing画面への描画
         void draw() {
             fill(255, 255, 128);
@@ -151,17 +178,27 @@ public class Shooter extends PApplet {
         Vector velocity; // 速度
         float center; // 左右の揺れの中心のx座標
         float factor; // 左右の揺れの係数
+        int HitPoint;
 
         // コンストラクタ
-        Enemy(Vector position, Vector velocity, float factor) {
+        Enemy(Vector position, Vector velocity, float factor, int HitPoint) {
             super(position);
             this.velocity = new Vector(velocity);
             center = position.x;
             this.factor = factor;
+            this.HitPoint = HitPoint;
         }
 
         boolean isEnemy() {
             return true;
+        }
+
+        int howHitPoint() {
+            return HitPoint;
+        }
+
+        void setHitPoint() {
+            HitPoint--;
         }
 
         // 時間dt分の移動
@@ -192,15 +229,23 @@ public class Shooter extends PApplet {
     class EnemyBullet extends ShooterObject {
 
         Vector velocity; // 速度
+        int id; // 弾の出す種類
+        boolean Remove;
 
         // コンストラクタ
-        EnemyBullet(Vector position, Vector velocity) {
+        EnemyBullet(Vector position, Vector velocity, int id, boolean Remove) {
             super(position);
             this.velocity = new Vector(velocity);
+            this.id = id;
+            this.Remove = Remove;
         }
 
         boolean isEnemyBullet() {
             return true;
+        }
+
+        boolean canRemove() {
+            return Remove;
         }
 
         // 時間dt分の移動
@@ -214,8 +259,15 @@ public class Shooter extends PApplet {
         // Processing画面への描画
         void draw() {
             // fill(255, 255, 128);
-            fill(255, 0, 0);
-            ellipse(position.x + 2, position.y + 10, 10, 10);
+            if (id == 0) {
+                fill(255, 0, 0);
+                ellipse(position.x + 2, position.y + 10, 10, 10);
+            } else if (id == 1) {
+                fill(0, 255, 0);
+                // rect(position.x - 2, position.y - 10, 4, 20);
+                ellipse(position.x + 2, position.y + 10, 10, 10);
+            }
+
         }
 
     }
@@ -234,7 +286,7 @@ public class Shooter extends PApplet {
     // 初期化
     void initialize() {
         playerList.clear();
-        playerList.add(new Player(SCREEN_SIZE.createScale(new Vector(0.5f, 0.9f))));
+        playerList.add(new Player(SCREEN_SIZE.createScale(new Vector(0.5f, 0.9f)), 3));
 
         EnemyList.clear();
         playerBulletList.clear();
@@ -247,14 +299,17 @@ public class Shooter extends PApplet {
         // 敵の位置・速度の初期値と揺れの係数をランダムに決定
 
         for (int i = 0; i < 1; i++) {
-            Vector enemyPosition = SCREEN_SIZE
-                    .createScale(new Vector(0.9f * random.nextFloat() + 0.05f, 0.5f * random.nextFloat()));
+            // Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.9f *
+            // random.nextFloat() + 0.05f, 0.5f * random.nextFloat()));
+            Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, 0.1f));
             // Vector enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, 0.2f));
-            Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 * (random.nextFloat() + 0.5f));
+            // Vector enemyVelocity = new Vector(1000 * (random.nextFloat() - 0.5f), 200 *
+            // (random.nextFloat() + 0.5f));
             // Vector enemyVelocity = new Vector(0, 0);
+            Vector enemyVelocity = new Vector(200, 0);
             float enemyFactor = 25 * (random.nextFloat() + 0.5f);
 
-            EnemyList.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
+            EnemyList.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor, 3));
 
         }
 
@@ -268,6 +323,30 @@ public class Shooter extends PApplet {
     // Processingのsetupメソッド
     public void setup() {
         initialize();
+    }
+
+    void snipeShot(int x) { // 自機に対して向かってくる弾
+        float xlength = playerList.get(0).position.x - EnemyList.get(0).position.x;
+        float ylength = playerList.get(0).position.y - EnemyList.get(0).position.y;
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position,
+                new Vector(x * xlength / ((float) Math.sqrt(xlength * xlength + ylength * ylength)),
+                        x * ylength / ((float) Math.sqrt(xlength * xlength + ylength * ylength))),
+                0, true));
+    }
+
+    void circleShot(int x) { // 敵の円状の弾
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, new Vector(0, x), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, new Vector(x, 0), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, new Vector(0, -1 * x), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, new Vector(-1 * x, 0), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position,
+                new Vector(x / (float) Math.sqrt(2), x / (float) Math.sqrt(2)), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position,
+                new Vector(x / (float) Math.sqrt(2), -1 * x / (float) Math.sqrt(2)), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position,
+                new Vector(-1 * x / (float) Math.sqrt(2), x / (float) Math.sqrt(2)), 1, false));
+        EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position,
+                new Vector(-1 * x / (float) Math.sqrt(2), -1 * x / (float) Math.sqrt(2)), 1, false));
     }
 
     // 移動
@@ -313,12 +392,29 @@ public class Shooter extends PApplet {
                 }
 
             }
-            if (EnemyBulletCount % 30 == 0) {
-                EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
-                EnemyBulletCount = 0;
+            if (EnemyBulletCount % 15 == 0 && EnemyBulletCount != 0) {
+                snipeShot(300);
             }
+            if (EnemyBulletCount % 150 == 0 && EnemyBulletCount != 0) {
+                circleShot(30);
+                circleShot(40);
+                circleShot(50);
+            }
+            if (EnemyBulletCount == 3600) {
+                EnemyBulletCount = 0;
+            } else {
+                EnemyBulletCount++;
+            }
+        } else if (GAME_MODE == MENU) {
+            if (playerList != null) {
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(0).isPlayer()) {
+                        ShooterObject player = playerList.get(0);
+                        player.position.set(mouseX, mouseY);
+                    }
 
-            EnemyBulletCount++;
+                }
+            }
         }
 
     }
@@ -332,8 +428,15 @@ public class Shooter extends PApplet {
                         if (playerList.get(i) != null && EnemyList.get(t) != null) {
                             if (EnemyList.get(t).isEnemy()) {
                                 if (playerList.get(i).checkCollision((Enemy) EnemyList.get(t))) {
-                                    playerList.get(i).removeFlag = true;
-                                    EnemyList.get(t).removeFlag = true;
+                                    playerList.get(i).setHitPoint();
+                                    if (playerList.get(i).howHitPoint() <= 0) {
+                                        playerList.get(i).removeFlag = true;
+                                    }
+
+                                    EnemyList.get(t).setHitPoint();
+                                    if (EnemyList.get(t).howHitPoint() <= 0) {
+                                        EnemyList.get(t).removeFlag = true;
+                                    }
                                 }
                             }
                         }
@@ -346,7 +449,10 @@ public class Shooter extends PApplet {
                             if (EnemyList.get(t).isEnemy()) {
                                 if (playerBulletList.get(i).checkCollision((Enemy) EnemyList.get(t))) {
                                     playerBulletList.get(i).removeFlag = true;
-                                    EnemyList.get(t).removeFlag = true;
+                                    EnemyList.get(t).setHitPoint();
+                                    if (EnemyList.get(t).howHitPoint() <= 0) {
+                                        EnemyList.get(t).removeFlag = true;
+                                    }
                                 }
                             }
                         }
@@ -358,7 +464,24 @@ public class Shooter extends PApplet {
                         if (playerList.get(i) != null && EnemyBulletList.get(t) != null) {
                             if (EnemyBulletList.get(t).isEnemyBullet()) {
                                 if (playerList.get(i).checkCollisionEnemyBullet((EnemyBullet) EnemyBulletList.get(t))) {
-                                    playerList.get(i).removeFlag = true;
+                                    playerList.get(i).setHitPoint();
+                                    if (playerList.get(i).howHitPoint() <= 0) {
+                                        playerList.get(i).removeFlag = true;
+                                    }
+                                    EnemyBulletList.get(t).removeFlag = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < playerBulletList.size(); i++) {
+                    for (int t = 0; t < EnemyBulletList.size(); t++) {
+                        if (playerBulletList.get(i) != null && EnemyBulletList.get(t) != null) {
+                            if (EnemyBulletList.get(t).isEnemyBullet() && EnemyBulletList.get(t).canRemove()) {
+                                if (playerBulletList.get(i)
+                                        .checkCollisionEnemyBullet((EnemyBullet) EnemyBulletList.get(t))) {
+                                    playerBulletList.get(i).removeFlag = true;
                                     EnemyBulletList.get(t).removeFlag = true;
                                 }
                             }
@@ -402,6 +525,15 @@ public class Shooter extends PApplet {
         int enemies = 0;
 
         if (GAME_MODE == MENU) {
+            if (playerList != null) {
+                players = playerList.size();
+                for (int i = 0; i < playerList.size(); i++) {
+                    if (playerList.get(i) != null) {
+                        playerList.get(i).draw();
+                    }
+                }
+            }
+
             initialize();
             fill(255, 255, 255);
             textSize(64);
@@ -460,11 +592,6 @@ public class Shooter extends PApplet {
                         EnemyList.get(i).draw();
                     }
                 }
-
-                fill(255, 255, 255);
-                textSize(30);
-                textAlign(CENTER, CENTER);
-                text(enemies, 0.1f * SCREEN_SIZE.x, 0.1f * SCREEN_SIZE.y);
             }
 
             if (playerBulletList != null) {
@@ -492,6 +619,25 @@ public class Shooter extends PApplet {
             if (enemies == 0 && players != 0) {
                 GAME_MODE = CLEAR;
             }
+
+            if (playerList != null) {
+                fill(255, 255, 255);
+                textSize(30);
+                textAlign(CENTER, CENTER);
+                if (players != 0) {
+                    text("player HP : " + playerList.get(0).howHitPoint(), 0.2f * SCREEN_SIZE.x, 0.05f * SCREEN_SIZE.y);
+                }
+            }
+
+            if (EnemyList != null) {
+                fill(255, 255, 255);
+                textSize(30);
+                textAlign(CENTER, CENTER);
+                if (enemies != 0) {
+                    text("enemy HP : " + EnemyList.get(0).howHitPoint(), 0.2f * SCREEN_SIZE.x, 0.1f * SCREEN_SIZE.y);
+                }
+
+            }
         }
 
     }
@@ -505,16 +651,23 @@ public class Shooter extends PApplet {
 
     // ProcessingのmousePressedメソッド
     public void mousePressed() {
-        playerBulletList.add(new Bullet(playerList.get(0).position, BULLET_VELOCITY));
+        if (GAME_MODE == PLAY) {
+            playerBulletList.add(new Bullet(playerList.get(0).position, BULLET_VELOCITY));
+        }
     }
 
     // ProcessingのkeyPressedメソッド
     public void keyPressed() {
-        if (key == 's') { // スクリーンショットを保存
-            saveFrame("Shooter.png");
-        } else if (key == 'r') { // リスタート
-            initialize();
-        } else if (key == ' ') { // next
+        if (GAME_MODE == PLAY) {
+            if (key == 's') { // スクリーンショットを保存
+                saveFrame("Shooter.png");
+            }
+
+            if (key == 'q') { // 敵弾の一斉除去
+                EnemyBulletList.clear(); // 敵の弾クリア
+            }
+        }
+        if (key == ' ') { // next
             if (GAME_MODE < 2) {
                 GAME_MODE++;
             } else {

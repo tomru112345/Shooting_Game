@@ -7,3 +7,5 @@
 * [敵に弾を発射させてみよう](https://bituse.info/game/shot/10)
 
 * [Processing-ShootingGame](https://github.com/muratamuu/Processing-ShootingGame)
+
+* [龍神録プログラミングの館](https://dixq.net/rp/)
