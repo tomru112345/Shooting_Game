@@ -7,7 +7,7 @@ public class Shooter extends PApplet {
     static final Vector SCREEN_SIZE = new Vector(500, 750); // 画面サイズ
     static final Vector PLAYER_VELOCITY = new Vector(200, 200); // 自機の速度
     static final Vector BULLET_VELOCITY = new Vector(0, -500); // 弾の速度
-    static final Vector ENEMY_BULLET_VELOCITY = new Vector(0, 125); // 弾の速度
+    static final Vector ENEMY_BULLET_VELOCITY = new Vector(0, 500); // 弾の速度
     static final float TIME_STEP = 1 / 60.0f; // 1フレームの時間
 
     static final int MENU = 0; // メニュー
@@ -241,6 +241,8 @@ public class Shooter extends PApplet {
     ArrayList<ShooterObject> playerBulletList = new ArrayList<ShooterObject>();
     ArrayList<ShooterObject> EnemyBulletList = new ArrayList<ShooterObject>();
 
+    int count = 0;
+
     // 初期化
     void initialize() {
         playerList.clear();
@@ -268,9 +270,7 @@ public class Shooter extends PApplet {
 
             EnemyList.add(new Enemy(enemyPosition, enemyVelocity, enemyFactor));
 
-            for (int t = 0; t < 5; t++) {
-                EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
-            }
+            EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
 
         }
 
@@ -327,11 +327,17 @@ public class Shooter extends PApplet {
                 for (int i = 0; i < EnemyBulletList.size(); i++) {
                     EnemyBulletList.get(i).step(TIME_STEP);
                 }
-            } else {
-                for (int t = 0; t < 5; t++) {
+
+                if (count % 3600 == 0) {
                     EnemyBulletList.add(new EnemyBullet(EnemyList.get(0).position, ENEMY_BULLET_VELOCITY));
                 }
+
             }
+        }
+        if (count % 3600 == 0) {
+            count = 0;
+        } else {
+            count++;
         }
 
     }
@@ -492,6 +498,7 @@ public class Shooter extends PApplet {
                 for (int i = 0; i < EnemyBulletList.size(); i++) {
                     if (EnemyBulletList.get(i) != null) {
                         EnemyBulletList.get(i).draw();
+
                     }
                 }
             }
