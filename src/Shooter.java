@@ -221,20 +221,20 @@ public class Shooter extends PApplet {
             if (!removeFlag) {
                 all_time += dt;
                 switch (enemy_pattern) {
-                    case 0:
-                        if (in_time < all_time && all_time < stop_time) {
-                            position.y += 2;
-                        } else if (all_time > out_time) {
-                            position.y -= 2;
-                        }
-                        break;
+                case 0:
+                    if (in_time < all_time && all_time < stop_time) {
+                        position.y += 2;
+                    } else if (all_time > out_time) {
+                        position.y -= 2;
+                    }
+                    break;
 
-                    case 1:
-                        if (in_time < all_time && all_time < out_time) {
-                            position.x += 1.5f;
-                            position.y += 0.9f;
-                        }
-                        break;
+                case 1:
+                    if (in_time < all_time && all_time < out_time) {
+                        position.x += 1.5f;
+                        position.y += 0.9f;
+                    }
+                    break;
                 }
                 if (position.y < -100) {
                     removeFlag = true;
@@ -349,15 +349,14 @@ public class Shooter extends PApplet {
 
         for (int i = 0; i < 1; i++) {
             Vector enemyPosition;
-            // enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, -0.1f));
-            // EnemyList.add(new Enemy(enemyPosition, 4, 0, 2, 20, 0));
-
+            enemyPosition = SCREEN_SIZE.createScale(new Vector(0.5f, -0.1f));
+            EnemyList.add(new Enemy(enemyPosition, 5, 0, 2, 100, 0));
             // Enemy(Vector position, int HitPoint, float in_time, float stop_time, float
             // out_time, int enemy_pattern)
-            for (int t = 0; t < 6; t++) {
-                enemyPosition = SCREEN_SIZE.createScale(new Vector(-0.1f, -0.1f));
-                EnemyList.add(new Enemy(enemyPosition, 4, 0 + (0.5f * t), 2, 100, 1));
-            }
+            // for (int t = 0; t < 6; t++) {
+            // enemyPosition = SCREEN_SIZE.createScale(new Vector(-0.1f, -0.1f));
+            // EnemyList.add(new Enemy(enemyPosition, 4, 0 + (0.5f * t), 2, 100, 1));
+            // }
 
         }
 
@@ -462,27 +461,27 @@ public class Shooter extends PApplet {
 
             }
 
-            if (EnemyBulletCount % 30 == 0 && EnemyBulletCount != 0) {
-                verticalShot(90);
-                // snipeShot(60);
+            // if (EnemyBulletCount % 30 == 0 && EnemyBulletCount != 0) {
+            // // verticalShot(90);
+            // snipeShot(60);
+            // }
+
+            if (EnemyList.get(0).howHitPoint() > 3) {
+                if (EnemyBulletCount % 15 == 0 && EnemyBulletCount != 0) {
+                    snipeShot(90);
+                }
             }
 
-            // if (EnemyList.get(0).howHitPoint() > 2) {
-            // if (EnemyBulletCount % 15 == 0 && EnemyBulletCount != 0) {
-            // snipeShot(90);
-            // }
-            // }
+            if (EnemyBulletCount % 150 == 0 && EnemyBulletCount != 0) {
+                circleShot(30);
+                circleShot(60);
+            }
 
-            // if (EnemyBulletCount % 150 == 0 && EnemyBulletCount != 0) {
-            // circleShot(30);
-            // circleShot(60);
-            // }
-
-            // if (EnemyList.get(0).howHitPoint() <= 2) {
-            // if (EnemyBulletCount % 4 == 0) {
-            // swirlShot(100, EnemyBulletCount % 360);
-            // }
-            // }
+            if (EnemyList.get(0).howHitPoint() <= 2) {
+                if (EnemyBulletCount % 4 == 0) {
+                    swirlShot(100, EnemyBulletCount % 360);
+                }
+            }
 
             if (EnemyBulletCount == 720) {
                 EnemyBulletCount = 0;
